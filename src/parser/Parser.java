@@ -4,34 +4,32 @@ import java.util.regex.Pattern;
 
 public class Parser implements IParser {
     private String input;
-    private int lookahead;
+    private int index;
 
     public Parser() {
         this.input = "";
-        this.lookahead = 0;
+        this.index = 0;
     }
 
     @Override
     public char lookahead() {
-        if (lookahead >= input.length()) {
-            return EOF;
-        }
-        return input.charAt(lookahead);
+        if (index >= input.length()) return EOF;
+        
+        return input.charAt(index);
     }
 
     @Override
     public char next() {
-        while (lookahead < input.length() && Character.isWhitespace(input.charAt(lookahead))) {
-            lookahead++;
+        char token = input.charAt(index);
+
+        while (index < input.length() && Character.isWhitespace(input.charAt(index))) {
+            index++;
         }
-        if (lookahead >= input.length()) {
+        if (index >= input.length()) {
             return EOF;
         }
-
-        char nextChar = input.charAt(lookahead);
-        
-        lookahead++;
-        return nextChar;
+        index++;
+        return token;
     }
 
     @Override
@@ -47,16 +45,14 @@ public class Parser implements IParser {
 
     @Override
     public void error(String msg) {
-        int col = (lookahead == 0) ? 1 : lookahead;
-        throw new RuntimeException("Syntax error: " + msg + " na coluna " + col);
+        throw new RuntimeException("Syntax error: " + msg + " na linha " + index);
     }
 
     @Override
     public boolean parse(String string) {
         this.input = string;
-        lookahead = 0;
+        index = 0;
         try{
-            
             Bool();
             return true;
         } catch (RuntimeException e) {
